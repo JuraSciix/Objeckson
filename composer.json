@@ -1,6 +1,5 @@
 {
   "name": "jurasciix/objeckson",
-  "version": "1.0.0",
   "config": {
     "platform": {
       "php": "8.1"
