@@ -124,4 +124,25 @@ class ObjecksonTest extends TestCase {
         // поэтому писать соответствующую проверку не нужно.
         self::assertEquals(IssueStatusModel::CLOSED, $model->status, "Model field 'status' mismatch");
     }
+
+    public function testEnumBackedValueAsImplicitKey(): void {
+        $data = [
+            'key' => 'rate',
+            'value' => 'med'
+        ];
+        /** @var PairModel<string, RateModel> $model */
+        $model = $this->objeckson->fromJsonWithGenerics($data, PairModel::class, 'string', RateModel::class);
+        self::assertInstanceOf(PairModel::class, $model, "Model type mismatch");
+        self::assertEquals('rate', $model->key, "Model key mismatch");
+        self::assertEquals(RateModel::MEDIUM, $model->value, "Model value mismatch");
+    }
+
+    public function testMemberNameAsImplicitKey(): void {
+        $data = [
+            'body_color' => 'bright_red'
+        ];
+        $model = $this->objeckson->fromJson($data, SmartphoneModel::class);
+        self::assertInstanceOf(SmartphoneModel::class, $model, "Model type mismatch");
+        self::assertEquals(ColorModel::BRIGHT_RED, $model->bodyColor, "Model bodyColor mismatch");
+    }
 }

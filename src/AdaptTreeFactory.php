@@ -16,6 +16,7 @@ use PHPStan\PhpDocParser\Parser\TokenIterator;
 use PHPStan\PhpDocParser\Parser\TypeParser;
 use ReflectionClass;
 use ReflectionEnum;
+use ReflectionEnumBackedCase;
 use ReflectionException;
 use ReflectionNamedType;
 
@@ -67,19 +68,7 @@ class AdaptTreeFactory {
         unset($attributes);
 
         if ($reflection->isEnum()) {
-            $map = [];
-            foreach ($reflection->getCases() as $case) {
-                $attributes = $case->getAttributes(JsonProperty::class);
-                if (empty($attributes)) {
-                    continue;
-                }
-                /** @var JsonProperty $propertyInfo */
-                $propertyInfo = $attributes[0]->newInstance();
-                foreach ($propertyInfo->keys as $key) {
-                    $map[$key] = $case->getValue();
-                }
-            }
-            return new EnumAdapter($map);
+            return $this->enumAdapter($reflection);
         }
 
         /** @var array<string, Property> $properties */
@@ -161,9 +150,9 @@ class AdaptTreeFactory {
 
             $required = empty($property->getAttributes(Optional::class));
 
-            // todo: case convert policy
             $properties[] = new Property(
-                $propertyInfo->keys ?: [$property->name],
+                // todo: остальные регистры
+                $propertyInfo->keys ?: [Utils::toSnakeCase($property->name)],
                 $typeNode,
                 $property->setValue(...),
                 $required
@@ -207,5 +196,32 @@ class AdaptTreeFactory {
         } else if ($node instanceof ArrayTypeNode) {
             $this->fixType($reflection, $node->type, $templateOverlays, $useStatements);
         }
+    }
+
+    private function enumAdapter(ReflectionEnum $reflection): EnumAdapter {
+        $map = [];
+        foreach ($reflection->getCases() as $case) {
+            $attributes = $case->getAttributes(JsonProperty::class);
+            if (empty($attributes)) {
+                continue;
+            }
+            /** @var JsonProperty $propertyInfo */
+            $propertyInfo = $attributes[0]->newInstance();
+            if (empty($propertyInfo->keys)) {
+                // Если ключи отсутствуют, значит значение должно находиться в значении кейса
+                if ($case instanceof ReflectionEnumBackedCase) {
+                    $keys = [$case->getBackingValue()];
+                } else {
+                    // todo: остальные регистры
+                    $keys = [Utils::toSnakeCase($case->name)];
+                }
+            } else {
+                $keys = $propertyInfo->keys;
+            }
+            foreach ($keys as $key) {
+                $map[$key] = $case->getValue();
+            }
+        }
+        return new EnumAdapter($map);
     }
 }
