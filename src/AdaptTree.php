@@ -28,7 +28,7 @@ class AdaptTree {
 
         foreach ($this->properties as $property) {
             foreach ($property->keys as $key) {
-                if (isset($data[$key])) {
+                if (array_key_exists($key, $data)) {
                     $value = $context->fromJson($data[$key], $property->type);
                     ($property->accessor)($instance, $value);
                     continue 2;
@@ -42,5 +42,15 @@ class AdaptTree {
         }
 
         return $instance;
+    }
+
+    public function __toString(): string {
+        $buf = "{$this->reflection->name} {\n";
+        foreach ($this->properties as $property) {
+            $keys = implode(", ", $property->keys);
+            $buf .= "\t$keys: $property->type\n";
+        }
+        $buf .= "}";
+        return $buf;
     }
 }

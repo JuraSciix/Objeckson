@@ -4,6 +4,7 @@ namespace jurasciix\objeckson;
 
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 
 class AdapterContext {
@@ -36,6 +37,12 @@ class AdapterContext {
         if ($this->hasAdapter($node)) {
             $adapter = $this->getAdapter($node);
         } else {
+            // Не храним nullable-адаптеры в памяти.
+            if ($node instanceof NullableTypeNode) {
+                if ($data === null)
+                    return null;
+                return $this->fromJson($data, $node->type);
+            }
             if ($node instanceof ArrayTypeNode) {
                 $adapter = new ArrayAdapter($node->type);
             } else {
@@ -47,15 +54,24 @@ class AdapterContext {
         return $adapter($data, $this);
     }
 
+    /**
+     * @internal
+     */
     public function withAdapter(TypeNode $type, callable $adapter): self {
         $this->adapters[strval($type)] = $adapter;
         return $this;
     }
 
+    /**
+     * @internal
+     */
     public function hasAdapter(TypeNode $type): bool {
         return array_key_exists(strval($type), $this->adapters);
     }
 
+    /**
+     * @internal
+     */
     public function getAdapter(TypeNode $type): ?callable {
         return $this->adapters[strval($type)] ?? null;
     }

@@ -8,7 +8,9 @@ use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
+use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
 use PHPStan\PhpDocParser\Lexer\Lexer;
 use PHPStan\PhpDocParser\Parser\ConstExprParser;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
@@ -18,7 +20,6 @@ use ReflectionClass;
 use ReflectionEnum;
 use ReflectionEnumBackedCase;
 use ReflectionException;
-use ReflectionNamedType;
 
 class AdaptTreeFactory {
 
@@ -36,7 +37,6 @@ class AdaptTreeFactory {
     }
 
     public function __invoke(TypeNode $type): callable {
-        // todo: поддержка nullable типов: ?Type, Type|null.
         if ($type instanceof IdentifierTypeNode) {
             $class = $type->name;
             $templates = [];
@@ -99,8 +99,6 @@ class AdaptTreeFactory {
         }
         unset($templates);
 
-        $useStatements = null; // lazy-init
-
         foreach ($reflection->getProperties() as $property) {
             if ($property->isStatic()) {
                 continue;
@@ -128,7 +126,7 @@ class AdaptTreeFactory {
                     $docType = $tags[0]->type;
                     unset($tags);
                     // Заменяем обобщенные типы со ссылок на явные.
-                    $this->fixType($reflection, $docType, $templateOverlays, $useStatements);
+                    $this->fixType($reflection, $docType, $templateOverlays);
                     $typeNode = $docType;
                     unset($docType);
                 } else {
@@ -138,14 +136,7 @@ class AdaptTreeFactory {
 
             if (!isset($typeNode)) {
                 // Объединенные (A|B) и пересеченные (A&B) пока не поддерживаются.
-                $refType = $property->getType();
-                if ($refType === null) {
-                    $typeNode = new IdentifierTypeNode('mixed');
-                } else if ($refType instanceof ReflectionNamedType) {
-                    $typeNode = new IdentifierTypeNode($refType->getName());
-                } else {
-                    throw new TreeException("Only named types are supported");
-                }
+                $typeNode = PhpDoc::fromReflection($property->getType());
             }
 
             $required = empty($property->getAttributes(Optional::class));
@@ -171,31 +162,41 @@ class AdaptTreeFactory {
         return $this->docParser->parse($iterator);
     }
 
-    private function fixType(ReflectionClass $reflection, TypeNode &$node, array $templateOverlays, ?array &$useStatements = null): void {
-        if ($node instanceof IdentifierTypeNode) {
+    private function fixType(ReflectionClass $reflection, TypeNode &$node, array $templateOverlays): void {
+        if ($node instanceof UnionTypeNode) {
+            // X|null => ?X
+
+            // Нетрезвый программист может дважды записать null.
+            // Удаляем null.
+            $nullable = false;
+            foreach ($node->types as $i => &$type) {
+                if ($type instanceof IdentifierTypeNode && strcasecmp($type->name, 'null') === 0) {
+                    unset($node->types[$i]);
+                    $nullable = true;
+                } else {
+                    $this->fixType($reflection, $type, $templateOverlays);
+                }
+            }
+            if ($nullable) {
+                $node = new NullableTypeNode($node);
+            }
+        } else if ($node instanceof IdentifierTypeNode) {
             if (isset($templateOverlays[$node->name])) {
                 $node = $templateOverlays[$node->name];
                 return;
             }
             if (!class_exists($node->name, false)) {
-                $useStatements ??= Reflection::getUseStatements($reflection);
-
-                if (isset($useStatements[$node->name])) {
-                    $node->name = $useStatements[$node->name];
-                } else if (!Reflection::isBuiltinType($node->name)) {
-                    // Если класс не найден и нет импортов, значит класс находится в том же пространстве имен.
-                    // Дописываем пространство имён.
-                    $node->name = $reflection->getNamespaceName() . '\\' . $node->name;
-                }
+                $node->name = Reflection::expandClassName($node->name, $reflection);
             }
         } else if ($node instanceof GenericTypeNode) {
-            $this->fixType($reflection, $node->type, $templateOverlays, $useStatements);
+            $this->fixType($reflection, $node->type, $templateOverlays);
             foreach ($node->genericTypes as &$type) {
-                $this->fixType($reflection, $type, $templateOverlays, $useStatements);
+                $this->fixType($reflection, $type, $templateOverlays);
             }
         } else if ($node instanceof ArrayTypeNode) {
-            $this->fixType($reflection, $node->type, $templateOverlays, $useStatements);
+            $this->fixType($reflection, $node->type, $templateOverlays);
         }
+        // todo: array shapes: array{x: Foo, y: Bar}
     }
 
     private function enumAdapter(ReflectionEnum $reflection): EnumAdapter {
