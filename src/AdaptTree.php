@@ -3,6 +3,7 @@
 namespace jurasciix\objeckson;
 
 use ReflectionClass;
+use ReflectionException;
 
 /**
  * @internal
@@ -24,12 +25,26 @@ class AdaptTree {
             throw new TreeException("Array expected, $type got");
         }
 
-        $instance = $this->reflection->newInstanceWithoutConstructor();
+        try {
+            $instance = $this->reflection->newInstanceWithoutConstructor();
+        } catch (ReflectionException $e) {
+            throw new TreeException(
+                message: "Unable to instantiate {$this->reflection->name}",
+                previous: $e
+            );
+        }
 
         foreach ($this->properties as $property) {
             foreach ($property->keys as $key) {
                 if (array_key_exists($key, $data)) {
-                    $value = $context->fromJson($data[$key], $property->type);
+                    try {
+                        $value = $context->fromJson($data[$key], $property->type);
+                    } catch (TreeException $e) {
+                        throw new TreeException(
+                            message: "Unable to map property \"$key\"",
+                            previous: $e
+                        );
+                    }
                     ($property->accessor)($instance, $value);
                     continue 2;
                 }

@@ -141,6 +141,7 @@ class AdaptTreeFactory {
 
             $required = empty($property->getAttributes(Optional::class));
 
+            // Note: As of PHP 8.1.0, calling the setAccessible()  has no effect; all properties are accessible by default.
             $properties[] = new Property(
                 // todo: остальные регистры
                 $propertyInfo->keys ?: [Utils::toSnakeCase($property->name)],
