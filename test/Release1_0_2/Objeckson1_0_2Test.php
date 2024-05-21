@@ -35,13 +35,17 @@ class Objeckson1_0_2Test extends TestCase {
     public function testCustomSetters(): void {
         $data = [
             'foo' => 10,
-            'bar' => -6
+            'bar' => -6,
+            '__construct' => 'c',
+            '__destruct' => 'd'
         ];
-        self::expectOutputString("setFoo" . "bar");
+        self::expectOutputString("setFoo" . "bar" . "construct");
         $model = $this->objeckson->fromJson($data, CustomSetterModel::class);
         self::assertInstanceOf(CustomSetterModel::class, $model, "Model type mismatch");
         self::assertSame(10 * 2 + 1, $model->foo, "Model foo mismatch");
         self::assertSame((1 - -6) * 3, $model->bar, "Model bar mismatch");
+        self::assertSame('c', $model->__construct, "Model __construct mismatch");
+        self::assertSame('d', $model->__destruct, "Model __destruct mismatch");
     }
 
     public function testArrayShapesWithGenerics(): void {

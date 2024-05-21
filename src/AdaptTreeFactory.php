@@ -137,7 +137,9 @@ class AdaptTreeFactory {
             foreach (Utils::getSetterNameVariants($property->name) as $variant) {
                 if ($reflection->hasMethod($variant)) {
                     $method = $reflection->getMethod($variant);
-                    if ($method->isStatic() && $method->isConstructor()) {
+                    if ($method->isStatic() || $method->isConstructor() || $method->isAbstract()
+                        || $method->isDestructor() || $method->isGenerator() || $method->isInternal()
+                        || $method->getNumberOfParameters() !== 1) {
                         continue;
                     }
                     // todo: А можно ли как-то покрасивее сделать?
