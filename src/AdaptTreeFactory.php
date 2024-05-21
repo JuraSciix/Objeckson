@@ -18,27 +18,16 @@ use ReflectionException;
 
 class AdaptTreeFactory {
 
-    public function __invoke(TypeNode $type): callable {
-        if ($type instanceof IdentifierTypeNode) {
-            $class = $type->name;
-            $templates = [];
-        } else if ($type instanceof GenericTypeNode) {
-            $class = $type->type->name;
-            $templates = $type->genericTypes;
-        } else {
-            throw new TreeException("Only identifiers and generic types are supported");
-        }
-
+    public function __invoke(IdentifierTypeNode $type, array $templates): callable {
         try {
-            $reflection = enum_exists($class)
-                ? new ReflectionEnum($class) : new ReflectionClass($class);
+            $reflection = enum_exists($type->name)
+                ? new ReflectionEnum($type->name) : new ReflectionClass($type->name);
         } catch (ReflectionException $e) {
             throw new InvalidArgumentException(
-                message: "No reflection for class [$class]",
+                message: "No reflection for class [$type->name]",
                 previous: $e
             );
         }
-        unset($class);
 
         // Ищем пользовательский адаптер
         $attributes = $reflection->getAttributes(JsonAdapter::class);

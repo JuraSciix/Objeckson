@@ -2,12 +2,13 @@
 
 namespace jurasciix\objeckson;
 
+use InvalidArgumentException;
 use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
-use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
 
 class AdapterContext {
 
@@ -49,8 +50,12 @@ class AdapterContext {
                 $adapter = new ArrayAdapter($node->type);
             } else if ($node instanceof ArrayShapeNode) {
                 $adapter = new ArrayShapeAdapter($node->items);
+            } else if ($node instanceof IdentifierTypeNode) {
+                $adapter = ($this->adaptTreeFactory)($node, []);
+            } else if ($node instanceof GenericTypeNode) {
+                $adapter = ($this->adaptTreeFactory)($node->type, $node->genericTypes);
             } else {
-                $adapter = ($this->adaptTreeFactory)($node);
+                throw new InvalidArgumentException("Illegal type node: " . get_class($node));
             }
             $this->withAdapter($node, $adapter);
         }
