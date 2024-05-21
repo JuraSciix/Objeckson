@@ -9,8 +9,8 @@ __Objeckson__ - это библиотека для отображения дин
 - [x] Анализировать обобщенные типы
 - [x] Работать с nullable-типами
 - [x] Пользовательские сеттеры
+- [x] Анализировать array-shapes: array{foo: Foo, bar: Bar}
 - [ ] Отображать на объекты STD: DateTime, SplFixedArray, etc...
-- [ ] Анализировать array-shapes: array{foo: Foo, bar: Bar}
 - [ ] Комбинации прямо отображаемых типов (примитивных): string|int|Foo
 - [ ] OneOf
 

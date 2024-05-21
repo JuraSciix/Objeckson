@@ -5,6 +5,7 @@ namespace jurasciix\objeckson;
 use InvalidArgumentException;
 use Nette\Utils\Reflection;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocNode;
+use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
@@ -230,6 +231,10 @@ class AdaptTreeFactory {
             }
         } else if ($node instanceof ArrayTypeNode) {
             $this->fixType($reflection, $node->type, $templateOverlays);
+        } else if ($node instanceof ArrayShapeNode) {
+            foreach ($node->items as $item) {
+                $this->fixType($reflection, $item->valueType, $templateOverlays);
+            }
         }
         // todo: array shapes: array{x: Foo, y: Bar}
     }

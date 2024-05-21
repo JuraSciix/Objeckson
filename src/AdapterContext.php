@@ -2,6 +2,7 @@
 
 namespace jurasciix\objeckson;
 
+use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
@@ -46,6 +47,8 @@ class AdapterContext {
             }
             if ($node instanceof ArrayTypeNode) {
                 $adapter = new ArrayAdapter($node->type);
+            } else if ($node instanceof ArrayShapeNode) {
+                $adapter = new ArrayShapeAdapter($node->items);
             } else {
                 $adapter = ($this->adaptTreeFactory)($node);
             }

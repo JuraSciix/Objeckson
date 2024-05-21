@@ -3,6 +3,8 @@
 namespace jurasciix\objeckson\test\Release1_0_2;
 
 use jurasciix\objeckson\Objeckson;
+use jurasciix\objeckson\test\Release1_0_0\PairModel;
+use jurasciix\objeckson\TreeException;
 use PHPUnit\Framework\TestCase;
 
 class Objeckson1_0_2Test extends TestCase {
@@ -40,5 +42,37 @@ class Objeckson1_0_2Test extends TestCase {
         self::assertInstanceOf(CustomSetterModel::class, $model, "Model type mismatch");
         self::assertSame(10 * 2 + 1, $model->foo, "Model foo mismatch");
         self::assertSame((1 - -6) * 3, $model->bar, "Model bar mismatch");
+    }
+
+    public function testArrayShapesWithGenerics(): void {
+        // Тестируем сразу array-shapes с обобщенными типами
+        $data = [
+            'array' => [
+                'pair' => [
+                    'key' => 'foo',
+                    'value' => 'bar'
+                ],
+                'x' => 10
+            ]
+        ];
+        $model = $this->objeckson->fromJson($data, ArrayShapeAwareModel::class);
+        self::assertInstanceOf(ArrayShapeAwareModel::class, $model, "Model type mismatch");
+        self::assertInstanceOf(PairModel::class, $model->array['pair'], "Model array pair mismatch");
+        self::assertSame('foo', $model->array['pair']->key, "Model array pair key mismatch");
+        self::assertSame('bar', $model->array['pair']->value, "Model array pair value mismatch");
+        self::assertSame(10, $model->array['x'], "Model array x mismatch");
+        self::assertNotContains('y', $model->array, "Model array y containing mismatch");
+    }
+
+    public function testArrayShapeWithoutRequiredShape(): void {
+        // Тестируем сразу array-shapes с обобщенными типами
+        $data = [
+            'array' => [
+                'x' => 10
+            ]
+        ];
+        self::expectException(TreeException::class);
+        self::expectExceptionMessage("Unable to map property \"array\"");
+        $this->objeckson->fromJson($data, ArrayShapeAwareModel::class);
     }
 }
