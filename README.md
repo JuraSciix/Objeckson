@@ -10,6 +10,7 @@ __Objeckson__ - это библиотека для отображения дин
 - [x] Работать с nullable-типами
 - [x] Пользовательские сеттеры
 - [x] Анализировать array-shapes: array{foo: Foo, bar: Bar}
+- [ ] Значения по умолчанию для Readonly свойств
 - [ ] Отображать на объекты STD: DateTime, SplFixedArray, etc...
 - [ ] Комбинации прямо отображаемых типов (примитивных): string|int|Foo
 - [ ] OneOf
@@ -21,7 +22,7 @@ __Objeckson__ - это библиотека для отображения дин
 * Composer
 
 Установка посредством __composer__:
-> php composer.phar require jurasciix/objeckson:^1
+> composer require jurasciix/objeckson:^1.0
 
 ## Быстрый туториал
 
@@ -33,22 +34,17 @@ use jurasciix\objeckson\JsonProperty;
 use jurasciix\objeckson\Optional;
 use jurasciix\objeckson\Objeckson;
 
+#[JsonProperty]
 class APIResponse {
-
-    #[JsonProperty]
     #[Optional]
     public ?APIError $error = null;
-    
-    #[JsonProperty]
     #[Optional]
     public mixed $data = null;
 }
 
+#[JsonProperty]
 class APIError {
-    #[JsonProperty]
     public int $code;
-    
-    #[JsonProperty]
     public string $description;
 }
 
