@@ -4,7 +4,10 @@ namespace jurasciix\objeckson;
 
 use Iterator;
 
-class Utils {
+/**
+ * @internal
+ */
+final class Utils {
 
     /**
      * Конвертирует регистр текста из camelCase/PascalCase/UPPER_SNAKE_CASE в snake_case.
