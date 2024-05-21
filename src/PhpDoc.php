@@ -12,7 +12,10 @@ use ReflectionNamedType;
 use ReflectionType;
 use ReflectionUnionType;
 
-class PhpDoc {
+/**
+ * @internal
+ */
+final class PhpDoc {
 
     public static function fromReflection(?ReflectionType $type): ?TypeNode {
         if ($type === null) {
