@@ -4,7 +4,6 @@ namespace jurasciix\objeckson;
 
 use InvalidArgumentException;
 use Nette\Utils\Reflection;
-use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
@@ -12,30 +11,12 @@ use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
-use PHPStan\PhpDocParser\Lexer\Lexer;
-use PHPStan\PhpDocParser\Parser\ConstExprParser;
-use PHPStan\PhpDocParser\Parser\PhpDocParser;
-use PHPStan\PhpDocParser\Parser\TokenIterator;
-use PHPStan\PhpDocParser\Parser\TypeParser;
 use ReflectionClass;
 use ReflectionEnum;
 use ReflectionEnumBackedCase;
 use ReflectionException;
 
 class AdaptTreeFactory {
-
-    private readonly Lexer $lexer;
-
-    private readonly PhpDocParser $docParser;
-
-    public function __construct() {
-        $this->lexer = new Lexer();
-        $constExprParser = new ConstExprParser();
-        $this->docParser = new PhpDocParser(
-            new TypeParser($constExprParser),
-            $constExprParser
-        );
-    }
 
     public function __invoke(TypeNode $type): callable {
         if ($type instanceof IdentifierTypeNode) {
@@ -94,7 +75,7 @@ class AdaptTreeFactory {
         // Если обнаружено несоответствие, то выбрасываем исключение.
         $classDocComment = $reflection->getDocComment();
         if ($classDocComment) {
-            $node = $this->parseDoc($classDocComment);
+            $node = PhpDoc::parseDocComment($classDocComment);
             $templateNodes = $node->getTemplateTagValues();
             unset($node);
             foreach ($templateNodes as $i => $templateNode) {
@@ -137,7 +118,7 @@ class AdaptTreeFactory {
             // Например: private int $foo
             $propertyDocComment = $property->getDocComment();
             if ($propertyDocComment) {
-                $node = $this->parseDoc($propertyDocComment);
+                $node = PhpDoc::parseDocComment($propertyDocComment);
                 $tags = $node->getVarTagValues();
                 unset($node);
                 if ($tags) {
@@ -191,13 +172,6 @@ class AdaptTreeFactory {
         return new AdaptTree($reflection, $properties);
     }
 
-    private function parseDoc(string $docComment): PhpDocNode {
-        $tokens = $this->lexer->tokenize($docComment);
-        $iterator = new TokenIterator($tokens);
-        unset($tokens);
-        return $this->docParser->parse($iterator);
-    }
-
     private function fixType(ReflectionClass $reflection, TypeNode &$node, array $templateOverlays): void {
         if ($node instanceof UnionTypeNode) {
             // X|null => ?X
@@ -236,7 +210,6 @@ class AdaptTreeFactory {
                 $this->fixType($reflection, $item->valueType, $templateOverlays);
             }
         }
-        // todo: array shapes: array{x: Foo, y: Bar}
     }
 
     private function enumAdapter(ReflectionEnum $reflection, bool $isProperty): EnumAdapter {
