@@ -1,6 +1,6 @@
 <?php
 
-namespace jurasciix\objeckson\test;
+namespace jurasciix\objeckson\test\Release1_0_0;
 
 class CortegeAdapter {
 

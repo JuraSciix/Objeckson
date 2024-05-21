@@ -1,8 +1,9 @@
 <?php
 
-namespace jurasciix\objeckson\test;
+namespace jurasciix\objeckson\test\Release1_0_1;
 
 use jurasciix\objeckson\JsonProperty;
+use jurasciix\objeckson\test\Release1_0_0\PairModel;
 
 class Model {
 
@@ -17,10 +18,4 @@ class Model {
      */
     #[JsonProperty]
     public ?PairModel $pair;
-
-    /**
-     * @var IssueModel|Cortege|null
-     */
-    #[JsonProperty]
-    public IssueModel|Cortege|null $x;
 }
