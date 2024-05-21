@@ -81,6 +81,8 @@ class AdaptTreeFactory {
             return $this->enumAdapter($reflection, $isProperty);
         }
 
+        // todo: проверка, что класс не абстрактный.
+
         /** @var array<string, Property> $properties */
         $properties = [];
 
@@ -159,12 +161,26 @@ class AdaptTreeFactory {
 
             $required = empty($property->getAttributes(Optional::class));
 
+            $setter = $property->setValue(...);
+
+            foreach (Utils::getSetterNameVariants($property->name) as $variant) {
+                if ($reflection->hasMethod($variant)) {
+                    $method = $reflection->getMethod($variant);
+                    if ($method->isStatic() && $method->isConstructor()) {
+                        continue;
+                    }
+                    // todo: А можно ли как-то покрасивее сделать?
+                    $setter = fn ($instance, $value) => $method->getClosure($instance)($value);
+                    break;
+                }
+            }
+
             // Note: As of PHP 8.1.0, calling the setAccessible()  has no effect; all properties are accessible by default.
             $properties[] = new Property(
                 // todo: остальные регистры
                 $keys ?: [Utils::toSnakeCase($property->name)],
                 $typeNode,
-                $property->setValue(...),
+                $setter,
                 $required
             );
 
