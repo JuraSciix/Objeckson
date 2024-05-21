@@ -5,7 +5,7 @@ namespace jurasciix\objeckson;
 use Attribute;
 use InvalidArgumentException;
 
-#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_CLASS_CONSTANT)]
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_CLASS_CONSTANT | Attribute::TARGET_CLASS)]
 class JsonProperty {
 
     /**
@@ -23,7 +23,6 @@ class JsonProperty {
             $key = $keys[$i];
             for ($j = $i + 1; $j < sizeof($keys); $j++) {
                 if ($keys[$j] === $key) {
-                    // Поскольку $aliases[$j] идентично $alias, вместо него можно упомянуть $alias.
                     throw new InvalidArgumentException("Duplicated key: $key");
                 }
             }

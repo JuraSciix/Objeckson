@@ -65,10 +65,20 @@ class AdaptTreeFactory {
             $adapterInfo = $attributes[0]->newInstance();
             return $adapterInfo->adapter;
         }
+
+        $isProperty = false;
+        if (!empty($attributes = $reflection->getAttributes(JsonProperty::class))) {
+            $propertyInfo = $attributes[0]->newInstance();
+            if (!empty($propertyInfo->keys)) {
+                throw new TreeException("#[JsonProperty] over above class must not contain values");
+            }
+            $isProperty = true;
+        }
+
         unset($attributes);
 
         if ($reflection->isEnum()) {
-            return $this->enumAdapter($reflection);
+            return $this->enumAdapter($reflection, $isProperty);
         }
 
         /** @var array<string, Property> $properties */
@@ -106,11 +116,19 @@ class AdaptTreeFactory {
 
             $attributes = $property->getAttributes(JsonProperty::class);
             if (empty($attributes)) {
-                continue;
+                if (!$isProperty) {
+                    continue;
+                }
+                $keys = false;
+            } else {
+                /** @var JsonProperty $propertyInfo */
+                $propertyInfo = $attributes[0]->newInstance();
+                $keys = $propertyInfo->keys;
+                if (empty($keys)) {
+                    $keys = false;
+                }
             }
 
-            /** @var JsonProperty $propertyInfo */
-            $propertyInfo = $attributes[0]->newInstance();
 
             // Если PHP-doc не указан или отсутствует тег @var, то полагаемся на синтаксический тип.
             // Например: private int $foo
@@ -144,7 +162,7 @@ class AdaptTreeFactory {
             // Note: As of PHP 8.1.0, calling the setAccessible()  has no effect; all properties are accessible by default.
             $properties[] = new Property(
                 // todo: остальные регистры
-                $propertyInfo->keys ?: [Utils::toSnakeCase($property->name)],
+                $keys ?: [Utils::toSnakeCase($property->name)],
                 $typeNode,
                 $property->setValue(...),
                 $required
@@ -200,16 +218,23 @@ class AdaptTreeFactory {
         // todo: array shapes: array{x: Foo, y: Bar}
     }
 
-    private function enumAdapter(ReflectionEnum $reflection): EnumAdapter {
+    private function enumAdapter(ReflectionEnum $reflection, bool $isProperty): EnumAdapter {
+        /** @var JsonProperty $propertyInfo */
+
         $map = [];
+
         foreach ($reflection->getCases() as $case) {
             $attributes = $case->getAttributes(JsonProperty::class);
+            $keys = [];
             if (empty($attributes)) {
-                continue;
+                if (!$isProperty) {
+                    continue;
+                }
+            } else {
+                $propertyInfo = $attributes[0]->newInstance();
+                $keys = $propertyInfo->keys;
             }
-            /** @var JsonProperty $propertyInfo */
-            $propertyInfo = $attributes[0]->newInstance();
-            if (empty($propertyInfo->keys)) {
+            if (empty($keys)) {
                 // Если ключи отсутствуют, значит значение должно находиться в значении кейса
                 if ($case instanceof ReflectionEnumBackedCase) {
                     $keys = [$case->getBackingValue()];
@@ -217,8 +242,6 @@ class AdaptTreeFactory {
                     // todo: остальные регистры
                     $keys = [Utils::toSnakeCase($case->name)];
                 }
-            } else {
-                $keys = $propertyInfo->keys;
             }
             foreach ($keys as $key) {
                 $map[$key] = $case->getValue();
