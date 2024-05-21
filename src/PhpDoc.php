@@ -50,10 +50,12 @@ final class PhpDoc {
 
         if ($type instanceof ReflectionNamedType) {
             $node = new IdentifierTypeNode($type->getName());
-            // allowsNull? Почему не NullableType?
+            // allowsNull? Почему не ReflectionNullableType?
             // Спасибо PHP Group за систему типов, будущие изменения
             // которой НЕ просматриваются, :)
-            if ($type->allowsNull()) {
+            if ($type->allowsNull() &&
+                // Тип null не должен оборачиваться в NullableTypeNode.
+                $type->getName() !== 'null') {
                 $node = new NullableTypeNode($node);
             }
             return $node;
