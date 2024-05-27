@@ -37,19 +37,19 @@ class AdaptTreeFactory {
             return $adapterInfo->adapter;
         }
 
-        $isProperty = false;
+        $isPropertyClass = false;
         if (!empty($attributes = $reflection->getAttributes(JsonProperty::class))) {
             $propertyInfo = $attributes[0]->newInstance();
             if (!empty($propertyInfo->keys)) {
                 throw new TreeException("#[JsonProperty] over above class must not contain values");
             }
-            $isProperty = true;
+            $isPropertyClass = true;
         }
 
         unset($attributes);
 
         if ($reflection->isEnum()) {
-            return $this->enumAdapter($reflection, $isProperty);
+            return $this->enumAdapter($reflection, $isPropertyClass);
         }
 
         // todo: проверка, что класс не абстрактный.
@@ -87,13 +87,18 @@ class AdaptTreeFactory {
                 continue;
             }
 
+            $excluded = !empty($property->getAttributes(Excluded::class));
+
             $attributes = $property->getAttributes(JsonProperty::class);
             if (empty($attributes)) {
-                if (!$isProperty) {
+                if (!$isPropertyClass || $excluded) {
                     continue;
                 }
                 $keys = false;
             } else {
+                if ($excluded) {
+                    throw new TreeException("You cannot use JsonExclude with JsonProperty");
+                }
                 /** @var JsonProperty $propertyInfo */
                 $propertyInfo = $attributes[0]->newInstance();
                 $keys = $propertyInfo->keys;
