@@ -9,6 +9,15 @@ use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 
 class Objeckson {
 
+    /**
+     * Создаёт статичный экземпляр класса Objeckson.
+     *
+     * @return Objeckson Статичный экземпляр.
+     */
+    public static function get() {
+        return ObjecksonHolder::$instance ??= new Objeckson();
+    }
+
     // todo: конфигурирование: enableCamelCase, disableSnakeCase, enableErrorOnUnmapped
 
     private readonly Closure $jsonDeserializer;
