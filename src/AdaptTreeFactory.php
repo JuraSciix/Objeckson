@@ -34,7 +34,7 @@ class AdaptTreeFactory {
         if ($attributes) {
             /** @var JsonAdapter $adapterInfo */
             $adapterInfo = $attributes[0]->newInstance();
-            return $adapterInfo->adapter;
+            return Utils::wrapCustomAdapter($adapterInfo->adapter);
         }
 
         $isPropertyClass = false;

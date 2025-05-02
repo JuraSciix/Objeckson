@@ -3,6 +3,7 @@
 namespace jurasciix\objeckson\test\Release1_0_4;
 
 use jurasciix\objeckson\Objeckson;
+use jurasciix\objeckson\ObjecksonException;
 use PHPUnit\Framework\TestCase;
 
 class Objeckson1_0_4Test extends TestCase {
@@ -33,5 +34,11 @@ class Objeckson1_0_4Test extends TestCase {
         $this->assertArrayHasKey("bar", $config->components, "YamlConfig has no 'bar' component");
         $this->assertInstanceOf(Component::class, $config->components['bar'], "YamlConfig 'bar' component instance mismatch");
         $this->assertSame(0xBEC2236, $config->components['bar']->id, "YamlConfig 'bar' component id mismatch");
+    }
+
+    public function testCustomAdapterException(): void {
+        $this->expectException(ObjecksonException::class);
+        $this->expectExceptionMessage("An exception occurred in custom adapter");
+        Objeckson::get()->fromJson([], MyModel::class);
     }
 }

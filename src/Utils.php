@@ -2,6 +2,7 @@
 
 namespace jurasciix\objeckson;
 
+use Exception;
 use Iterator;
 use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
@@ -49,5 +50,18 @@ final class Utils {
         }
 
         return false;
+    }
+
+    public static function wrapCustomAdapter(callable $function) {
+        return function (...$args) use ($function) {
+            try {
+                return call_user_func_array($function, $args);
+            } catch (Exception $e) {
+                throw new ObjecksonException(
+                    message: "An exception occurred in custom adapter",
+                    previous: $e
+                );
+            }
+        };
     }
 }
