@@ -47,13 +47,24 @@ class AdapterContext {
                 return $this->fromJson($data, $node->type);
             }
             if ($node instanceof ArrayTypeNode) {
-                $adapter = new ArrayAdapter($node->type);
+                $adapter = new ArrayAdapter(new IdentifierTypeNode('mixed'), $node->type);
             } else if ($node instanceof ArrayShapeNode) {
                 $adapter = new ArrayShapeAdapter($node->items);
             } else if ($node instanceof IdentifierTypeNode) {
                 $adapter = ($this->adaptTreeFactory)($node, []);
             } else if ($node instanceof GenericTypeNode) {
-                $adapter = ($this->adaptTreeFactory)($node->type, $node->genericTypes);
+                if (Utils::isTypeNodeArray($node->type)) {
+                    $genericsNum = sizeof($node->genericTypes);
+                    if ($genericsNum === 1) {
+                        $adapter = new ArrayAdapter(new IdentifierTypeNode('mixed'), $node->type);
+                    } else if ($genericsNum === 2){
+                        $adapter = new ArrayAdapter($node->genericTypes[0], $node->genericTypes[1]);
+                    } else {
+                        throw new InvalidArgumentException("Array can have at most 2 arguments, but $genericsNum");
+                    }
+                } else {
+                    $adapter = ($this->adaptTreeFactory)($node->type, $node->genericTypes);
+                }
             } else {
                 throw new InvalidArgumentException("Illegal type node: " . get_class($node));
             }

@@ -3,6 +3,9 @@
 namespace jurasciix\objeckson;
 
 use Iterator;
+use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
+use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 
 /**
  * @internal
@@ -25,5 +28,26 @@ final class Utils {
         yield "set" . ucfirst($trimmedFieldName);
         yield $trimmedFieldName;
         yield $fieldName;
+    }
+
+    /**
+     * Проверяет, чтобы `$node` был типом массива.
+     *
+     * @return bool
+     */
+    public static function isTypeNodeArray(TypeNode $node) {
+        if ($node instanceof ArrayShapeNode) {
+            return true;
+        }
+
+        // Если тип определен с обобщенными типами, то PHPStan
+        // воспринимает 'array' за идентификатор...
+        // Пример: array<int, string>
+        // Результат: GenericTypeNode(IdentifierTypeNode('array'), [...])
+        if (($node instanceof IdentifierTypeNode) && strcasecmp($node->name, 'array') === 0) {
+            return true;
+        }
+
+        return false;
     }
 }

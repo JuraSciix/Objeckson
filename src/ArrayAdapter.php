@@ -10,7 +10,8 @@ use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 class ArrayAdapter {
 
     public function __construct(
-        private readonly TypeNode $componentType
+        private readonly TypeNode $keyType,
+        private readonly TypeNode $valueType
     ) {}
 
     public function __invoke(mixed $data, AdapterContext $context): array {
@@ -21,7 +22,7 @@ class ArrayAdapter {
 
         $array = [];
         foreach ($data as $i => $item) {
-            $array[$i] = $context->fromJson($item, $this->componentType);
+            $array[$context->fromJson($i, $this->keyType)] = $context->fromJson($item, $this->valueType);
         }
 
         return $array;
