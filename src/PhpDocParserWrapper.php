@@ -9,6 +9,9 @@ use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
 use PHPStan\PhpDocParser\Parser\TypeParser;
 
+/**
+ * @internal
+ */
 class PhpDocParserWrapper {
     private readonly Lexer $lexer;
     private readonly PhpDocParser $phpDocParser;
