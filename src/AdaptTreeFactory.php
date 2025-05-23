@@ -87,18 +87,13 @@ class AdaptTreeFactory {
                 continue;
             }
 
-            $excluded = !empty($property->getAttributes(Excluded::class));
-
             $attributes = $property->getAttributes(JsonProperty::class);
             if (empty($attributes)) {
-                if (!$isPropertyClass || $excluded) {
+                if (!$isPropertyClass) {
                     continue;
                 }
                 $keys = false;
             } else {
-                if ($excluded) {
-                    throw new TreeException("You cannot use JsonExclude with JsonProperty");
-                }
                 /** @var JsonProperty $propertyInfo */
                 $propertyInfo = $attributes[0]->newInstance();
                 $keys = $propertyInfo->keys;
