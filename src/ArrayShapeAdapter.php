@@ -1,6 +1,6 @@
 <?php
 
-namespace jurasciix\objeckson;
+namespace JuraSciix\Objeckson;
 
 use PHPStan\PhpDocParser\Ast\Type\ArrayShapeItemNode;
 

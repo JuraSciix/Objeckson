@@ -1,6 +1,6 @@
 <?php
 
-namespace jurasciix\objeckson;
+namespace JuraSciix\Objeckson;
 
 /**
  * Выбрасывается если в данных обнаружена ошибка или неоднозначность.

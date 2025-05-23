@@ -15,12 +15,12 @@
   },
   "autoload": {
     "psr-4": {
-      "jurasciix\\objeckson\\": "src"
+      "JuraSciix\\Objeckson\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "jurasciix\\objeckson\\test\\": "test"
+      "JuraSciix\\Objeckson\\Test": "test"
     }
   },
   "scripts": {
