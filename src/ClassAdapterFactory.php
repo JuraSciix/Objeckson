@@ -25,7 +25,7 @@ class ClassAdapterFactory {
     private $phpDocParser;
 
     public function __construct() {
-        $this->phpDocParser = new PhpDocParser();
+        $this->phpDocParser = new PhpDocParserWrapper();
     }
 
     public function __invoke(IdentifierTypeNode $type, array $templates): callable {
@@ -47,15 +47,7 @@ class ClassAdapterFactory {
             return Utils::wrapCustomAdapter($adapterInfo->adapter);
         }
 
-        $isPropertyClass = false;
-        if (!empty($attributes = $reflection->getAttributes(JsonProperty::class))) {
-            $propertyInfo = $attributes[0]->newInstance();
-            if (!empty($propertyInfo->keys)) {
-                throw new TreeException("#[JsonProperty] over above class must not contain values");
-            }
-            $isPropertyClass = true;
-        }
-
+        $isPropertyClass = true;
         unset($attributes);
 
         if ($reflection->isEnum()) {
