@@ -11,12 +11,22 @@ use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
+use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use ReflectionClass;
 use ReflectionEnum;
 use ReflectionEnumBackedCase;
 use ReflectionException;
 
 class AdaptTreeFactory {
+
+    /**
+     * @var PhpDocParserWrapper
+     */
+    private $phpDocParser;
+
+    public function __construct() {
+        $this->phpDocParser = new PhpDocParser();
+    }
 
     public function __invoke(IdentifierTypeNode $type, array $templates): callable {
         try {
@@ -64,7 +74,7 @@ class AdaptTreeFactory {
         // Если обнаружено несоответствие, то выбрасываем исключение.
         $classDocComment = $reflection->getDocComment();
         if ($classDocComment) {
-            $node = PhpDoc::parseDocComment($classDocComment);
+            $node = $this->phpDocParser->get($classDocComment);
             $templateNodes = $node->getTemplateTagValues();
             unset($node);
             foreach ($templateNodes as $i => $templateNode) {
@@ -107,7 +117,7 @@ class AdaptTreeFactory {
             // Например: private int $foo
             $propertyDocComment = $property->getDocComment();
             if ($propertyDocComment) {
-                $node = PhpDoc::parseDocComment($propertyDocComment);
+                $node = $this->phpDocParser->get($propertyDocComment);
                 $tags = $node->getVarTagValues();
                 unset($node);
                 if ($tags) {
@@ -127,7 +137,7 @@ class AdaptTreeFactory {
 
             if (!isset($typeNode)) {
                 // Объединенные (A|B) и пересеченные (A&B) пока не поддерживаются.
-                $typeNode = PhpDoc::fromReflection($property->getType());
+                $typeNode = Utils::fromReflection($property->getType());
             }
 
             $required = empty($property->getAttributes(Optional::class));
