@@ -89,20 +89,6 @@ class ClassAdapterFactory {
 
             $setter = $property->setValue(...);
 
-            foreach (Utils::getSetterNameVariants($property->name) as $variant) {
-                if ($reflection->hasMethod($variant)) {
-                    $method = $reflection->getMethod($variant);
-                    if ($method->isStatic() || $method->isConstructor() || $method->isAbstract()
-                        || $method->isDestructor() || $method->isGenerator() || $method->isInternal()
-                        || $method->getNumberOfParameters() !== 1) {
-                        continue;
-                    }
-                    // todo: А можно ли как-то покрасивее сделать?
-                    $setter = fn ($instance, $value) => $method->getClosure($instance)($value);
-                    break;
-                }
-            }
-
             // Note: As of PHP 8.1.0, calling the setAccessible()  has no effect; all properties are accessible by default.
             $properties[] = new Property(
                 // todo: остальные регистры

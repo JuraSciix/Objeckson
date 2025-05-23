@@ -33,17 +33,6 @@ final class Utils {
     }
 
     /**
-     * Возвращает итератор вариантов для названий сеттера для поля $fieldName.
-     */
-    public static function getSetterNameVariants(string $fieldName): Iterator {
-        // todo: Детальная конвертация регистров. Пример: __block => Block
-        $trimmedFieldName = trim($fieldName, '_');
-        yield "set" . ucfirst($trimmedFieldName);
-        yield $trimmedFieldName;
-        yield $fieldName;
-    }
-
-    /**
      * Проверяет, чтобы `$node` был типом массива.
      *
      * @return bool
