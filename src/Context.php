@@ -10,7 +10,7 @@ use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 
-class AdapterContext {
+class Context {
 
     private readonly AdaptTreeFactory $adaptTreeFactory;
 

@@ -19,7 +19,7 @@ class AdaptTree {
         private readonly array $properties
     ) {}
 
-    public function __invoke(mixed $data, AdapterContext $context): object {
+    public function __invoke(mixed $data, Context $context): object {
         if (!is_array($data)) {
             $type = gettype($data);
             throw new TreeException("Array expected, $type got");

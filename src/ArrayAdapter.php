@@ -14,7 +14,7 @@ class ArrayAdapter {
         private readonly TypeNode $valueType
     ) {}
 
-    public function __invoke(mixed $data, AdapterContext $context): array {
+    public function __invoke(mixed $data, Context $context): array {
         if (!is_array($data)) {
             $type = gettype($data);
             throw new TreeException("Array expected, $type given");

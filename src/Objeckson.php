@@ -22,11 +22,11 @@ class Objeckson {
 
     private readonly Closure $jsonDeserializer;
 
-    private readonly AdapterContext $context;
+    private readonly Context $context;
 
     public function __construct(
         callable $jsonDeserializer = new JsonDecode(),
-        AdapterContext $context = new AdapterContext()
+        Context $context = new Context()
     ) {
         $this->jsonDeserializer = $jsonDeserializer(...);
         $this->context = $context;
