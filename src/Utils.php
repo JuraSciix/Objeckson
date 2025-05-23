@@ -5,11 +5,16 @@ namespace JuraSciix\Objeckson;
 use AssertionError;
 use Exception;
 use Iterator;
+use Nette\Utils\Reflection;
 use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
+use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IntersectionTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
+use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
+use ReflectionClass;
 use ReflectionIntersectionType;
 use ReflectionNamedType;
 use ReflectionType;
@@ -72,8 +77,51 @@ final class Utils {
         };
     }
 
-    public static function fromReflection(?ReflectionType $type): ?TypeNode {
-        if ($type === null) {
+    public static function isTypeNodeNull(TypeNode $node) {
+        return $node instanceof IdentifierTypeNode && strcasecmp($node->name, 'null') === 0;
+    }
+
+    public static function fixType(TypeNode &$node, ReflectionClass $reflection): void {
+        if ($node instanceof UnionTypeNode) {
+            // Преобразуем X|null в ?X
+            $nullable = false;
+            foreach ($node->types as $i => &$type) {
+                if (self::isTypeNodeNull($type)) {
+                    // Нетрезвый программист может дважды записать null.
+                    // Удаляем null.
+                    unset($node->types[$i]);
+                    $nullable = true;
+                } else {
+                    self::fixType($type, $reflection);
+                }
+            }
+            if (count($node->types) == 1) {
+                $node = $node->types[0];
+            }
+            if ($nullable) {
+                $node = new NullableTypeNode($node);
+            }
+        } else if ($node instanceof IdentifierTypeNode) {
+            if (!class_exists($node->name, false)) {
+                $node->name = Reflection::expandClassName($node->name, $reflection);
+            }
+        } else if ($node instanceof ArrayShapeNode) {
+            foreach ($node->items as $item) {
+                self::fixType($item->valueType, $reflection);
+            }
+        } else if ($node instanceof ArrayTypeNode || $node instanceof NullableTypeNode) {
+            self::fixType($node->type, $reflection);
+        }
+
+        // То, что не поддерживается (generics, etc) - не исправляем.
+    }
+
+
+    /**
+     * @return TypeNode|null
+     */
+    public static function fromReflection(?ReflectionType $type) {
+        if (is_null($type)) {
             return null;
         }
 
@@ -84,6 +132,7 @@ final class Utils {
             // которой НЕ просматриваются, :)
             if ($type->allowsNull() &&
                 // Тип null не должен оборачиваться в NullableTypeNode.
+                // Заметка: Рефлексия всегда возвращает эту строку в нижнем регистре
                 $type->getName() !== 'null') {
                 $node = new NullableTypeNode($node);
             }

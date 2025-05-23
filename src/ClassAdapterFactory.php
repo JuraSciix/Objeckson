@@ -23,9 +23,14 @@ class ClassAdapterFactory {
      * @var PhpDocParserWrapper
      */
     private $phpDocParser;
+    /**
+     * @var Reflector
+     */
+    private $reflector;
 
     public function __construct() {
         $this->phpDocParser = new PhpDocParserWrapper();
+        $this->reflector = new Reflector();
     }
 
     public function __invoke(IdentifierTypeNode $type, array $templates): callable {
@@ -59,30 +64,6 @@ class ClassAdapterFactory {
         /** @var array<string, Property> $properties */
         $properties = [];
 
-        /** @var array<string, TypeNode> $templateOverlays TemplateName => TypeNode */
-        $templateOverlays = [];
-
-        // Связываем переданные обобщенные типы с теми, которые указаны в PHPDoc класса.
-        // Если обнаружено несоответствие, то выбрасываем исключение.
-        $classDocComment = $reflection->getDocComment();
-        if ($classDocComment) {
-            $node = $this->phpDocParser->get($classDocComment);
-            $templateNodes = $node->getTemplateTagValues();
-            unset($node);
-            foreach ($templateNodes as $i => $templateNode) {
-                if (!isset($templates[$i])) {
-                    break;
-                }
-                $templateOverlays[$templateNode->name] = $templates[$i];
-            }
-            unset($templateNodes);
-        }
-        if (sizeof($templateOverlays) !== sizeof($templates)) {
-            $declared = sizeof($templateOverlays);
-            $given = sizeof($templates);
-            throw new TreeException("Templates count mismatch. Declared: $declared, given: $given");
-        }
-        unset($templates);
 
         foreach ($reflection->getProperties() as $property) {
             if ($property->isStatic()) {
@@ -91,9 +72,6 @@ class ClassAdapterFactory {
 
             $attributes = $property->getAttributes(JsonProperty::class);
             if (empty($attributes)) {
-                if (!$isPropertyClass) {
-                    continue;
-                }
                 $keys = false;
             } else {
                 /** @var JsonProperty $propertyInfo */
@@ -105,32 +83,7 @@ class ClassAdapterFactory {
             }
 
 
-            // Если PHP-doc не указан или отсутствует тег @var, то полагаемся на синтаксический тип.
-            // Например: private int $foo
-            $propertyDocComment = $property->getDocComment();
-            if ($propertyDocComment) {
-                $node = $this->phpDocParser->get($propertyDocComment);
-                $tags = $node->getVarTagValues();
-                unset($node);
-                if ($tags) {
-                    if (sizeof($tags) > 1) {
-                        throw new TreeException("@var must be single");
-                    }
-                    $docType = $tags[0]->type;
-                    unset($tags);
-                    // Заменяем обобщенные типы со ссылок на явные.
-                    $this->fixType($reflection, $docType, $templateOverlays);
-                    $typeNode = $docType;
-                    unset($docType);
-                } else {
-                    unset($tags);
-                }
-            }
-
-            if (!isset($typeNode)) {
-                // Объединенные (A|B) и пересеченные (A&B) пока не поддерживаются.
-                $typeNode = Utils::fromReflection($property->getType());
-            }
+            $typeNode = $this->reflector->reflectProperty($property);
 
             $required = empty($property->getAttributes(Optional::class));
 
@@ -163,46 +116,6 @@ class ClassAdapterFactory {
         }
 
         return new ClassAdapter($reflection, $properties);
-    }
-
-    private function fixType(ReflectionClass $reflection, TypeNode &$node, array $templateOverlays): void {
-        if ($node instanceof UnionTypeNode) {
-            // X|null => ?X
-
-            // Нетрезвый программист может дважды записать null.
-            // Удаляем null.
-            $nullable = false;
-            foreach ($node->types as $i => &$type) {
-                if ($type instanceof IdentifierTypeNode && strcasecmp($type->name, 'null') === 0) {
-                    unset($node->types[$i]);
-                    $nullable = true;
-                } else {
-                    $this->fixType($reflection, $type, $templateOverlays);
-                }
-            }
-            if ($nullable) {
-                $node = new NullableTypeNode($node);
-            }
-        } else if ($node instanceof IdentifierTypeNode) {
-            if (isset($templateOverlays[$node->name])) {
-                $node = $templateOverlays[$node->name];
-                return;
-            }
-            if (!class_exists($node->name, false)) {
-                $node->name = Reflection::expandClassName($node->name, $reflection);
-            }
-        } else if ($node instanceof GenericTypeNode) {
-            $this->fixType($reflection, $node->type, $templateOverlays);
-            foreach ($node->genericTypes as &$type) {
-                $this->fixType($reflection, $type, $templateOverlays);
-            }
-        } else if ($node instanceof ArrayTypeNode) {
-            $this->fixType($reflection, $node->type, $templateOverlays);
-        } else if ($node instanceof ArrayShapeNode) {
-            foreach ($node->items as $item) {
-                $this->fixType($reflection, $item->valueType, $templateOverlays);
-            }
-        }
     }
 
     private function enumAdapter(ReflectionEnum $reflection, bool $isProperty): EnumAdapter {
