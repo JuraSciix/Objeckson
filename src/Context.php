@@ -12,7 +12,7 @@ use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 
 class Context {
 
-    private readonly AdaptTreeFactory $adaptTreeFactory;
+    private readonly ClassAdapterFactory $adaptTreeFactory;
 
     /**
      * @var array<string, callable>
@@ -20,7 +20,7 @@ class Context {
     private array $adapters = [];
 
     public function __construct() {
-        $this->adaptTreeFactory = new AdaptTreeFactory();
+        $this->adaptTreeFactory = new ClassAdapterFactory();
 
         $this->registerBuiltin();
     }

@@ -17,7 +17,7 @@ use ReflectionEnum;
 use ReflectionEnumBackedCase;
 use ReflectionException;
 
-class AdaptTreeFactory {
+class ClassAdapterFactory {
 
     /**
      * @var PhpDocParserWrapper
@@ -170,7 +170,7 @@ class AdaptTreeFactory {
             unset($typeNode, $propertyInfo, $property);
         }
 
-        return new AdaptTree($reflection, $properties);
+        return new ClassAdapter($reflection, $properties);
     }
 
     private function fixType(ReflectionClass $reflection, TypeNode &$node, array $templateOverlays): void {

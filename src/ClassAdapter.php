@@ -8,7 +8,7 @@ use ReflectionException;
 /**
  * @internal
  */
-class AdaptTree {
+class ClassAdapter {
 
     /**
      * @param ReflectionClass $reflection
