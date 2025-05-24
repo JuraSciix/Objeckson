@@ -26,7 +26,7 @@ class ArrayShapeAdapter {
         foreach ($this->shapes as $shape) {
             $key = $shape->keyName->name;
             if (array_key_exists($key, $data)) {
-                $result[$key] = $context->fromJson($data[$key], $shape->valueType);
+                $result[$key] = $context->doFromJson($data[$key], $shape->valueType);
             } else {
                 if (!$shape->optional) {
                     throw new TreeException("Required shape key \"$key\" is missing");

@@ -42,7 +42,7 @@ class Objeckson {
             $data = ($this->jsonDeserializer)($data);
         }
         $typeNode = new IdentifierTypeNode($type);
-        return $this->context->fromJson($data, $typeNode);
+        return $this->context->doFromJson($data, $typeNode);
     }
 
     /**
@@ -55,7 +55,7 @@ class Objeckson {
             $data = ($this->jsonDeserializer)($data);
         }
         $typeNode = new ArrayTypeNode(new IdentifierTypeNode($type));
-        return $this->context->fromJson($data, $typeNode);
+        return $this->context->doFromJson($data, $typeNode);
     }
 
     /**
@@ -73,6 +73,6 @@ class Objeckson {
             $genericNodes[] = new IdentifierTypeNode($generic);
         }
         $typeNode = new GenericTypeNode(new IdentifierTypeNode($type), $genericNodes);
-        return $this->context->fromJson($data, $typeNode);
+        return $this->context->doFromJson($data, $typeNode);
     }
 }

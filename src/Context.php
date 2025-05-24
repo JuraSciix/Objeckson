@@ -36,7 +36,7 @@ class Context {
             ->withAdapter(new IdentifierTypeNode('mixed'), fn($x) => $x);
     }
 
-    public function fromJson(mixed $data, TypeNode $node): mixed {
+    public function doFromJson(mixed $data, TypeNode $node): mixed {
         if ($this->hasAdapter($node)) {
             $adapter = $this->getAdapter($node);
         } else {
@@ -44,7 +44,7 @@ class Context {
             if ($node instanceof NullableTypeNode) {
                 if ($data === null)
                     return null;
-                return $this->fromJson($data, $node->type);
+                return $this->doFromJson($data, $node->type);
             }
             if ($node instanceof ArrayTypeNode) {
                 $adapter = new ArrayAdapter(new IdentifierTypeNode('mixed'), $node->type);

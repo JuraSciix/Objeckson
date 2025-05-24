@@ -22,7 +22,7 @@ class ArrayAdapter {
 
         $array = [];
         foreach ($data as $i => $item) {
-            $array[$context->fromJson($i, $this->keyType)] = $context->fromJson($item, $this->valueType);
+            $array[$context->doFromJson($i, $this->keyType)] = $context->doFromJson($item, $this->valueType);
         }
 
         return $array;

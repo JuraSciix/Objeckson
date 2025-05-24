@@ -38,7 +38,7 @@ class ClassAdapter {
             foreach ($property->keys as $key) {
                 if (array_key_exists($key, $data)) {
                     try {
-                        $value = $context->fromJson($data[$key], $property->type);
+                        $value = $context->doFromJson($data[$key], $property->type);
                     } catch (TreeException $e) {
                         throw new TreeException(
                             message: "Unable to map property \"$key\"",
