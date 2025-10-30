@@ -3,6 +3,10 @@
 namespace jurasciix\objeckson;
 
 use InvalidArgumentException;
+use jurasciix\objeckson\Internal\AdaptTree;
+use jurasciix\objeckson\Internal\PhpDoc;
+use jurasciix\objeckson\Internal\Property;
+use jurasciix\objeckson\Internal\Utils;
 use Nette\Utils\Reflection;
 use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;

@@ -3,6 +3,9 @@
 namespace jurasciix\objeckson;
 
 use InvalidArgumentException;
+use jurasciix\objeckson\Internal\ArrayAdapter;
+use jurasciix\objeckson\Internal\ArrayShapeAdapter;
+use jurasciix\objeckson\Internal\Utils;
 use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;

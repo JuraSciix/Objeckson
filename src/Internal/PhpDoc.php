@@ -1,6 +1,6 @@
 <?php
 
-namespace jurasciix\objeckson;
+namespace jurasciix\objeckson\Internal;
 
 use AssertionError;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocNode;

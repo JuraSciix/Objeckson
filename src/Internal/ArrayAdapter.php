@@ -1,7 +1,9 @@
 <?php
 
-namespace jurasciix\objeckson;
+namespace jurasciix\objeckson\Internal;
 
+use jurasciix\objeckson\AdapterContext;
+use jurasciix\objeckson\TreeException;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 
 /**
