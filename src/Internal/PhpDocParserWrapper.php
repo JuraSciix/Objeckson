@@ -1,6 +1,6 @@
 <?php
 
-namespace JuraSciix\Objeckson;
+namespace JuraSciix\Objeckson\Internal;
 
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocNode;
 use PHPStan\PhpDocParser\Lexer\Lexer;

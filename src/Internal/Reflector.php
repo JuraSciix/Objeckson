@@ -1,11 +1,9 @@
 <?php
 
-namespace JuraSciix\Objeckson;
+namespace JuraSciix\Objeckson\Internal;
 
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
-use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
-use ReflectionNamedType;
 use ReflectionProperty;
 
 /**

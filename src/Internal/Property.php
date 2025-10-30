@@ -1,6 +1,6 @@
 <?php
 
-namespace JuraSciix\Objeckson;
+namespace JuraSciix\Objeckson\Internal;
 
 use Closure;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;

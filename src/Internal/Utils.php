@@ -1,14 +1,12 @@
 <?php
 
-namespace JuraSciix\Objeckson;
+namespace JuraSciix\Objeckson\Internal;
 
 use AssertionError;
 use Exception;
-use Iterator;
 use Nette\Utils\Reflection;
 use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
-use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IntersectionTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;

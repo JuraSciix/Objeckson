@@ -3,15 +3,12 @@
 namespace JuraSciix\Objeckson;
 
 use InvalidArgumentException;
-use Nette\Utils\Reflection;
-use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
-use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
-use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
+use JuraSciix\Objeckson\Internal\ClassAdapter;
+use JuraSciix\Objeckson\Internal\PhpDocParserWrapper;
+use JuraSciix\Objeckson\Internal\Property;
+use JuraSciix\Objeckson\Internal\Reflector;
+use JuraSciix\Objeckson\Internal\Utils;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
-use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
-use PHPStan\PhpDocParser\Ast\Type\TypeNode;
-use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
-use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use ReflectionClass;
 use ReflectionEnum;
 use ReflectionEnumBackedCase;
