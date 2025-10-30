@@ -1,9 +1,12 @@
 <?php
 
-namespace jurasciix\objeckson;
+namespace jurasciix\objeckson\Internal;
 
 use UnitEnum;
 
+/**
+ * @internal
+ */
 class EnumAdapter {
 
     /**

@@ -3,6 +3,7 @@
 namespace jurasciix\objeckson;
 
 use InvalidArgumentException;
+use jurasciix\objeckson\Internal\AdaptTreeFactory;
 use jurasciix\objeckson\Internal\ArrayAdapter;
 use jurasciix\objeckson\Internal\ArrayShapeAdapter;
 use jurasciix\objeckson\Internal\Utils;

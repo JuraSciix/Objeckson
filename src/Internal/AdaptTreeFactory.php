@@ -1,12 +1,12 @@
 <?php
 
-namespace jurasciix\objeckson;
+namespace jurasciix\objeckson\Internal;
 
 use InvalidArgumentException;
-use jurasciix\objeckson\Internal\AdaptTree;
-use jurasciix\objeckson\Internal\PhpDoc;
-use jurasciix\objeckson\Internal\Property;
-use jurasciix\objeckson\Internal\Utils;
+use jurasciix\objeckson\Excluded;
+use jurasciix\objeckson\JsonAdapter;
+use jurasciix\objeckson\JsonProperty;
+use jurasciix\objeckson\Optional;
 use Nette\Utils\Reflection;
 use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
@@ -20,6 +20,9 @@ use ReflectionEnum;
 use ReflectionEnumBackedCase;
 use ReflectionException;
 
+/**
+ * @internal
+ */
 class AdaptTreeFactory {
 
     public function __invoke(IdentifierTypeNode $type, array $templates): callable {
