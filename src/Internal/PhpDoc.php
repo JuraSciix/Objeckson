@@ -23,26 +23,6 @@ use ReflectionUnionType;
  */
 final class PhpDoc {
 
-    public static function parseDocComment(string $docComment): PhpDocNode {
-        static $lexer, $docParser, $uninitialized = true;
-        if ($uninitialized) {
-            $lexer = new Lexer();
-            $constExprParser = new ConstExprParser();
-            $docParser = new PhpDocParser(
-                new TypeParser($constExprParser),
-                $constExprParser
-            );
-            unset($constExprParser);
-            $uninitialized = false;
-        }
-
-        $tokens = $lexer->tokenize($docComment);
-        unset($docComment);
-        $iterator = new TokenIterator($tokens);
-        unset($tokens);
-        return $docParser->parse($iterator);
-    }
-
     public static function fromReflection(?ReflectionType $type): ?TypeNode {
         if ($type === null) {
             return null;

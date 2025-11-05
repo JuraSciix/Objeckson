@@ -26,6 +26,12 @@ use ReflectionException;
  */
 class AdaptTreeFactory {
 
+    private readonly PhpDocParserWrapper $phpDocParser;
+
+    public function __construct() {
+        $this->phpDocParser = new PhpDocParserWrapper();
+    }
+
     public function __invoke(IdentifierTypeNode $type, array $templates): callable {
         try {
             $reflection = enum_exists($type->name)
@@ -72,7 +78,7 @@ class AdaptTreeFactory {
         // Если обнаружено несоответствие, то выбрасываем исключение.
         $classDocComment = $reflection->getDocComment();
         if ($classDocComment) {
-            $node = PhpDoc::parseDocComment($classDocComment);
+            $node = $this->phpDocParser->parseDocument($classDocComment);
             $templateNodes = $node->getTemplateTagValues();
             unset($node);
             foreach ($templateNodes as $i => $templateNode) {
@@ -120,7 +126,7 @@ class AdaptTreeFactory {
             // Например: private int $foo
             $propertyDocComment = $property->getDocComment();
             if ($propertyDocComment) {
-                $node = PhpDoc::parseDocComment($propertyDocComment);
+                $node = $this->phpDocParser->parseDocument($propertyDocComment);
                 $tags = $node->getVarTagValues();
                 unset($node);
                 if ($tags) {
