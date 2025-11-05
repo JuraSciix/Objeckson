@@ -7,6 +7,7 @@ use jurasciix\objeckson\Excluded;
 use jurasciix\objeckson\JsonAdapter;
 use jurasciix\objeckson\JsonProperty;
 use jurasciix\objeckson\Optional;
+use jurasciix\objeckson\TreeException;
 use Nette\Utils\Reflection;
 use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
