@@ -2,6 +2,7 @@
 
 namespace jurasciix\objeckson\Internal;
 
+use jurasciix\objeckson\TreeException;
 use UnitEnum;
 
 /**
